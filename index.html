@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173f35">
+  <title>Finova Personal Finance Tracker</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="assets/js/storage.js" defer></script>
+  <script src="assets/js/transactions.js" defer></script>
+  <script src="assets/js/dashboard.js" defer></script>
+  <script src="assets/js/budgets.js" defer></script>
+  <script src="assets/js/analytics.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">F</div>
+      <span>Finova</span>
+    </div>
+    <nav class="nav-list" aria-label="Primary navigation">
+      <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></button>
+      <button class="nav-item" data-page="transactions"><span class="nav-icon">↕</span><span>Transactions</span></button>
+      <button class="nav-item" data-page="budgets"><span class="nav-icon">◫</span><span>Budgets</span></button>
+      <button class="nav-item" data-page="analytics"><span class="nav-icon">⌁</span><span>Analytics</span></button>
+      <button class="nav-item" data-page="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="icon-button menu-button" id="menuButton" aria-label="Open navigation">☰</button>
+      <div>
+        <p class="eyebrow" id="currentDate"></p>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <button class="primary-button" id="addTransactionButton"><span>+</span> Add transaction</button>
+    </header>
+
+    <section class="page active" id="dashboard-page">
+      <div class="summary-grid">
+        <article class="summary-card balance-card">
+          <div class="card-heading"><span>Total balance</span><span class="card-icon">▰</span></div>
+          <strong id="balanceValue">₦0</strong>
+          <p id="balanceNote">Across all accounts</p>
+        </article>
+        <article class="summary-card">
+          <div class="card-heading"><span>Total income</span><span class="card-icon green">↗</span></div>
+          <strong id="incomeValue">₦0</strong>
+          <p class="positive" id="incomeNote">0% of savings</p>
+        </article>
+        <article class="summary-card">
+          <div class="card-heading"><span>Total expenses</span><span class="card-icon coral">↘</span></div>
+          <strong id="expenseValue">₦0</strong>
+          <p class="negative" id="expenseNote">0% of income</p>
+        </article>
+        <article class="summary-card">
+          <div class="card-heading"><span>Savings</span><span class="card-icon blue">◎</span></div>
+          <strong id="savingsValue">₦0</strong>
+          <p id="savingsNote">0% savings rate</p>
+        </article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="panel overview-panel">
+          <div class="panel-header">
+            <div><p class="eyebrow">This month</p><h2>Financial overview</h2></div>
+            <select id="dashboardMonth" class="compact-select" aria-label="Dashboard month"></select>
+          </div>
+          <div class="overview-chart"><canvas id="overviewChart"></canvas></div>
+          <div class="chart-legend">
+            <div><span class="legend-dot income"></span><span>Income</span><strong id="monthIncome">₦0</strong></div>
+            <div><span class="legend-dot expense"></span><span>Expenses</span><strong id="monthExpense">₦0</strong></div>
+          </div>
+        </article>
+
+        <article class="panel budget-panel">
+          <div class="panel-header"><div><p class="eyebrow">Spending</p><h2>Budget overview</h2></div></div>
+          <div id="budgetOverview" class="budget-overview"></div>
+        </article>
+
+        <article class="panel recent-panel">
+          <div class="panel-header"><div><p class="eyebrow">Activity</p><h2>Recent transactions</h2></div>
+            <button class="text-button" data-navigate="transactions">View all</button>
+          </div>
+          <div id="recentTransactions" class="transaction-list"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="transactions-page">
+      <div class="panel">
+        <div class="panel-header history-header">
+          <div><p class="eyebrow">All activity</p><h2>Transaction history</h2></div>
+          <button class="secondary-button" id="exportQuickButton">Export JSON</button>
+        </div>
+        <div class="filters">
+          <label class="search-field"><span>⌕</span><input id="searchTransactions" type="search" placeholder="Search description"></label>
+          <select id="filterType" aria-label="Filter type"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expense</option></select>
+          <select id="filterCategory" aria-label="Filter category"><option value="all">All categories</option></select>
+          <input id="filterMonth" type="month" aria-label="Filter month">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Description</th><th>Category</th><th>Type</th><th>Date</th><th class="align-right">Amount</th><th><span class="sr-only">Actions</span></th></tr></thead>
+            <tbody id="transactionTableBody"></tbody>
+          </table>
+          <div id="transactionEmpty" class="empty-state hidden">
+            <div class="empty-icon">↕</div><h3>No transactions found</h3><p>Add a transaction or change your filters.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="budgets-page">
+      <div class="budget-layout">
+        <article class="panel">
+          <div class="panel-header"><div><p class="eyebrow">Plan ahead</p><h2>Monthly budgets</h2></div>
+            <input id="budgetMonth" type="month" class="compact-select">
+          </div>
+          <div id="budgetList" class="budget-list"></div>
+        </article>
+        <article class="panel budget-form-panel">
+          <h2>Set a budget</h2>
+          <form id="budgetForm">
+            <label>Monthly overall limit
+              <input id="overallBudget" type="number" min="0" step="0.01" placeholder="0.00">
+            </label>
+            <div id="categoryBudgetFields"></div>
+            <button class="primary-button full-button" type="submit">Save budgets</button>
+          </form>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="analytics-page">
+      <div class="analytics-grid">
+        <article class="panel chart-panel"><div class="panel-header"><div><p class="eyebrow">Cash flow</p><h2>Income vs expenses</h2></div></div><canvas id="incomeExpenseChart"></canvas></article>
+        <article class="panel chart-panel"><div class="panel-header"><div><p class="eyebrow">Breakdown</p><h2>Expenses by category</h2></div></div><canvas id="categoryChart"></canvas></article>
+        <article class="panel chart-panel wide"><div class="panel-header"><div><p class="eyebrow">12 month trend</p><h2>Monthly performance</h2></div></div><canvas id="trendChart"></canvas></article>
+        <article class="panel chart-panel"><div class="panel-header"><div><p class="eyebrow">Summary</p><h2>Savings overview</h2></div></div><canvas id="savingsChart"></canvas></article>
+      </div>
+    </section>
+
+    <section class="page" id="settings-page">
+      <div class="settings-layout">
+        <article class="panel">
+          <h2>General preferences</h2>
+          <form id="settingsForm" class="settings-form">
+            <label>Currency
+              <select id="currencyInput">
+                <option value="NGN">Nigerian Naira (₦)</option>
+                <option value="USD">US Dollar ($)</option>
+                <option value="EUR">Euro (€)</option>
+                <option value="GBP">British Pound (£)</option>
+                <option value="CAD">Canadian Dollar (C$)</option>
+                <option value="JPY">Japanese Yen (¥)</option>
+              </select>
+            </label>
+            <label>Opening balance
+              <input id="openingBalanceInput" type="number" min="0" step="0.01">
+            </label>
+            <button class="primary-button" type="submit">Save preferences</button>
+          </form>
+        </article>
+        <article class="panel">
+          <h2>Data management</h2>
+          <p class="muted">Your financial records are stored only in this browser. Export a JSON backup regularly.</p>
+          <div class="data-actions">
+            <button class="secondary-button" id="exportButton">Export financial records</button>
+            <label class="secondary-button file-button">Import backup<input id="importInput" type="file" accept=".json,application/json"></label>
+            <button class="danger-button" id="resetButton">Reset all data</button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="transactionModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="transactionModalTitle">
+      <div class="modal-header"><div><p class="eyebrow">Record activity</p><h2 id="transactionModalTitle">Add transaction</h2></div><button class="icon-button" id="closeModal" aria-label="Close">×</button></div>
+      <form id="transactionForm">
+        <input type="hidden" id="transactionId">
+        <div class="type-toggle" role="group" aria-label="Transaction type">
+          <button type="button" class="type-option active" data-type="expense">Expense</button>
+          <button type="button" class="type-option" data-type="income">Income</button>
+        </div>
+        <label>Description<input id="transactionDescription" type="text" maxlength="80" placeholder="e.g. Grocery shopping" required></label>
+        <div class="form-row">
+          <label>Amount<input id="transactionAmount" type="number" min="0.01" step="0.01" placeholder="0.00" required></label>
+          <label>Date<input id="transactionDate" type="date" required></label>
+        </div>
+        <label>Category<select id="transactionCategory" required></select></label>
+        <p class="form-error" id="transactionError" role="alert"></p>
+        <div class="modal-actions"><button type="button" class="secondary-button" id="cancelModal">Cancel</button><button type="submit" class="primary-button">Save transaction</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
